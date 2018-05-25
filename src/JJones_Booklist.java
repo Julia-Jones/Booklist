@@ -1,7 +1,9 @@
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -14,10 +16,8 @@ import java.util.ArrayList;
  * @author R
  */
 public class JJones_Booklist extends javax.swing.JFrame {
-
-    int int1;
-    ArrayList <String> books = new ArrayList();
-    BufferedReader br = null; 
+    //creating original integer variables for the number of Searches and the index 
+ int index, numSearches;
     /**
      * Creates new form JJones_Booklist
      */
@@ -102,9 +102,7 @@ public class JJones_Booklist extends javax.swing.JFrame {
                         .addComponent(Output2))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(21, 21, 21)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(find)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 191, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 191, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(input, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -127,6 +125,10 @@ public class JJones_Booklist extends javax.swing.JFrame {
                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(find)
+                .addGap(170, 170, 170))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -141,9 +143,9 @@ public class JJones_Booklist extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(20, 20, 20)
                 .addComponent(find)
-                .addGap(27, 27, 27)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(Output1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -162,51 +164,127 @@ public class JJones_Booklist extends javax.swing.JFrame {
     private void inputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_inputActionPerformed
-  
-    public class Book{
-        String bookNumber, title;
+//Using a linear search to check if the user entered an active reference number
+static public Boolean linearSearch(String[] A, String B) {
+//original for loop to determine if the number is in the file
+    for (int k = 0; k < A.length; k++) {
+        //if A(number going up by one) is equal to the number entered
+        if (A[k].equals(B)) {
+            //if true return true
+            return true;
+        }
+    }
+    //if not return false and the number entered is not in the list
+    return false;
+}
 
-    public Book(String bookNumber2, String title2){
-     bookNumber = bookNumber2;
-    title = title2;
-        }   
-    }   
+//Using a Binary Search to check the array to see if the user inputted an active reference number
+public static Boolean binarySearch(String[] A, int left, int right, String V){
 
-ArrayList <Book> Books = new ArrayList <Book> ();
-Book [] bookList;
+    
+    int middle;
+    //if the left side is larger then the right then the data is not sorted and this way will not work(returning false) 
+     if (left > right) {
+         return false;
+     }
+//checking if the number entered is the middle number. if so it returns true 
+     middle = (left + right)/2;
+     int compare = V.compareTo(A[middle]);
+     if (compare == 0) {
+         return true;
+     }
+     
+     //if the number is smaller then 0 then it will check the left side 
+     if (compare < 0) {
+         return binarySearch(A, left, middle-1, V);
+     } else {
+     //if the number is larger then 0 then it will check the right side 
+         return binarySearch(A, middle + 1, right, V);
+     }
+}
 
-static public Boolean sortedLinearSearch (String [] A, String B) {
-        for (int k = 0; k<A.length; k++) {  //Begin to go through the array.
-            int compare = A[k].compareTo(B); //Compare the current string to what we are looking for.
-            if (compare == 0) { //compareTo returns 0 if the items match
-                return true;
-            }
-            if (compare > 0) { //compareTo returns a value larger than 0 if the item is too big.
-                return false;
-         //  The item searched for can no longer be in this array.
+    private void findActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_findActionPerformed
+    //creating the array (holds all the information needed)
+        ArrayList<String> books = new ArrayList <String>();
+        
+     //   creating a bufferReader to read through the text file
+      BufferedReader br = null;
+      //creating a string for the reference number when entered
+      String refnumb; 
+      
+           //opening the text file
+           
+      try{
+          br = new BufferedReader(new FileReader("C:\\Users\\Public\\Desktop\\booklist1.txt"));
+          String word;
+          //reads information in the text file line for line
+         while ((word = br.readLine()) != null ){
+            books.add(word);
+        }
+         //making sure you dont read past th eend of the file 
+    } catch (IOException e) {
+        e.printStackTrace();
+    } finally {
+          //closes the file 
+        try {
+            br.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+    //converts the ArrayList to an Array to make it easier to use
+     String [] bookList = new String[books.size()];
+    books.toArray(bookList);
+
+      
+    //Set the variable 'refnumb' to the value that was inputted
+    //into the Scanner
+    refnumb = input.getText();
+
+    Boolean resultLinear = linearSearch(bookList, refnumb);
+    Boolean resultBinary = binarySearch(bookList, 0, bookList.length-1, refnumb);
+
+    //Analyze each elementin the Array
+    for (int i = 0; i < bookList.length; i++) {
+
+        //Determine if the value of 'i' is equal to the number entered
+        //converted into an int format
+        if (i == Integer.parseInt(refnumb)) {
+
+            //Determine if the 'i' index of the Array is equal to the user inputted number
+            if (bookList[i].equals(refnumb)) {
+
+                //if the statements above were true, the 'index' will equal the current value for 'i'
+                index = i;
             }
         }
-        return false;
-}
-    private void findActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_findActionPerformed
-        //linear search
-    String [] bookList = new String[books.size()];
-    String [] mySortedArray = {"1", "2", "4", "6", "10", "12", "14","20", "24", "26", "31", "32", "33", "35","40", "46", "50", "52", "54", "56", "66","100"};
-    
-    for(int i=0; i<bookList.length; i++){
-         if (bookList[i].equals(int1)){
-     Output1.setText("The Book is " + bookList[i]);
     }
- }
 
+    //If the number was found this will be output
+    if (resultLinear == true) {
+        Output1.setText("Linear Search: Reference Number " + refnumb +
+                " was found in the library. The book with that number is: " + bookList[index+1]);
+    } else {
+        //if not found then it will say that it is not in the library 
+       Output1.setText("Linear Search: Reference Number " + refnumb
+                + " not in the library. No book with that number.");
+    }
 
-        
-        
-        
+    //if the number has been found using the Binary Search then if will output this 
+    if (resultBinary != false) {
+        Output2.setText("Binary Search: Reference Number " + refnumb +
+                " was found in the library. The book with that number is: " + bookList[index+1]);
+    } else {
+        //if not found then this will be output
+        Output2.setText("Binary Search: Reference Number " + refnumb
+                + " not in the library. No book with that number.");
+    }
+
     }//GEN-LAST:event_findActionPerformed
 
     private void exitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitActionPerformed
         // TODO add your handling code here:
+        //exit program 
         System.exit(0);
     }//GEN-LAST:event_exitActionPerformed
 
